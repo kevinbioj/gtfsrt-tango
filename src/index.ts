@@ -58,7 +58,7 @@ console.log("✓ Instantiated web server.");
 const findActualTripId = (input: string) => {
 	const slicedInput = input.slice(3);
 	return (
-		tripIds.find((tripId) => tripId.startsWith(slicedInput)) ?? slicedInput
+		tripIds.find((tripId) => tripId?.startsWith(slicedInput)) ?? slicedInput
 	);
 };
 
@@ -87,7 +87,7 @@ async function patchGtfsRt(feedUrl: string) {
 		}
 
 		if (entity.vehicle?.stopId) {
-			entity.vehicle.stopId = findActualTripId(entity.vehicle.stopId);
+			entity.vehicle.stopId = entity.vehicle.stopId.slice(2);
 		}
 	}
 
