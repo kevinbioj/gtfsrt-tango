@@ -1,0 +1,9 @@
+services:
+  producer:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: gtfsrt-tango
+    ports:
+      - "127.0.0.1:50009:3000"
+    restart: unless-stopped
