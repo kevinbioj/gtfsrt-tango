@@ -20,35 +20,60 @@ await downloadGtfs(GTFS_URL, gtfsDirectory);
 const tripIds = await importTripIds(gtfsDirectory);
 console.log("✓ Loaded GTFS resource.");
 
+const REFRESH_INTERVAL_MS = +(process.env.REFRESH_INTERVAL_MS ?? 15_000);
+
+type FeedCache = {
+	payload: GtfsRealtime.transit_realtime.FeedMessage;
+	encoded: Uint8Array;
+} | null;
+
+let cacheTU: FeedCache = null;
+let cacheVP: FeedCache = null;
+
+async function refreshCache(feedUrl: string, label: string) {
+	try {
+		const payload = await patchGtfsRt(feedUrl);
+		const encoded = await encodeGtfsRt(payload);
+		return { payload, encoded };
+	} catch (e) {
+		console.error(`Failed to refresh cache for ${label}:`, e);
+		return null;
+	}
+}
+
+console.log("▸ Fetching initial GTFS-RT data...");
+[cacheTU, cacheVP] = await Promise.all([
+	refreshCache(GTFSRT_TU, "trip-updates"),
+	refreshCache(GTFSRT_VP, "vehicle-positions"),
+]);
+console.log("✓ Initial GTFS-RT data fetched.");
+
+setInterval(async () => {
+	const [tu, vp] = await Promise.all([
+		refreshCache(GTFSRT_TU, "trip-updates"),
+		refreshCache(GTFSRT_VP, "vehicle-positions"),
+	]);
+	if (tu) cacheTU = tu;
+	if (vp) cacheVP = vp;
+}, REFRESH_INTERVAL_MS);
+
 console.log("▸ Instantiating web server...");
 const hono = new Hono();
 hono.get("/trip-updates", async (c) => {
-	try {
-		const patchedPayload = await patchGtfsRt(GTFSRT_TU);
-		if (c.req.query("format") === "json")
-			return c.json(patchedPayload.toJSON());
-		return stream(c, async (stream) => {
-			const encoded = await encodeGtfsRt(patchedPayload);
-			await stream.write(encoded);
-		});
-	} catch (e) {
-		console.error(e);
-		return c.redirect(GTFSRT_TU);
-	}
+	if (!cacheTU) return c.redirect(GTFSRT_TU);
+	if (c.req.query("format") === "json")
+		return c.json(cacheTU.payload.toJSON());
+	return stream(c, async (stream) => {
+		await stream.write(cacheTU!.encoded);
+	});
 });
 hono.get("/vehicle-positions", async (c) => {
-	try {
-		const patchedPayload = await patchGtfsRt(GTFSRT_VP);
-		if (c.req.query("format") === "json")
-			return c.json(patchedPayload.toJSON());
-		return stream(c, async (stream) => {
-			const encoded = await encodeGtfsRt(patchedPayload);
-			await stream.write(encoded);
-		});
-	} catch (e) {
-		console.error(e);
-		return c.redirect(GTFSRT_VP);
-	}
+	if (!cacheVP) return c.redirect(GTFSRT_VP);
+	if (c.req.query("format") === "json")
+		return c.json(cacheVP.payload.toJSON());
+	return stream(c, async (stream) => {
+		await stream.write(cacheVP!.encoded);
+	});
 });
 serve({ fetch: hono.fetch, port: +(process.env.PORT ?? 3000) });
 console.log("✓ Instantiated web server.");
