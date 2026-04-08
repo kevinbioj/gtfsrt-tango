@@ -13,22 +13,22 @@
 		"lint": "biome lint",
 		"format": "biome format --write"
 	},
-	"packageManager": "pnpm@10.15.1+sha512.34e538c329b5553014ca8e8f4535997f96180a1d0f614339357449935350d924e22f8614682191264ec33d1462ac21561aff97f6bb18065351c162c7e8f6de67",
+	"packageManager": "pnpm@10.33.0+sha512.10568bb4a6afb58c9eb3630da90cc9516417abebd3fabbe6739f0ae795728da1491e9db5a544c76ad8eb7570f5c4bb3d6c637b2cb41bfdcdb47fa823c8649319",
 	"devDependencies": {
-		"@biomejs/biome": "2.2.2",
+		"@biomejs/biome": "2.4.10",
 		"@types/decompress": "^4.2.7",
-		"@types/node": "^24.3.1",
-		"@types/papaparse": "^5.3.16",
-		"tsx": "^4.20.5",
-		"typescript": "^5.9.2"
+		"@types/node": "^25.5.2",
+		"@types/papaparse": "^5.5.2",
+		"tsx": "^4.21.0",
+		"typescript": "^6.0.2"
 	},
 	"dependencies": {
-		"@hono/node-server": "^1.19.1",
-		"csv-parse": "^6.1.0",
+		"@hono/node-server": "^1.19.13",
+		"csv-parse": "^6.2.1",
 		"decompress": "^4.2.1",
 		"gtfs-realtime-bindings": "^1.1.1",
-		"hono": "^4.9.6",
+		"hono": "^4.12.12",
 		"papaparse": "^5.5.3",
-		"protobufjs": "^7.5.4"
+		"protobufjs": "^8.0.1"
 	}
 }
