@@ -61,17 +61,17 @@ console.log("▸ Instantiating web server...");
 const hono = new Hono();
 hono.get("/trip-updates", async (c) => {
 	if (!cacheTU) return c.redirect(GTFSRT_TU);
-	if (c.req.query("format") === "json")
-		return c.json(cacheTU.payload.toJSON());
+	if (c.req.query("format") === "json") return c.json(cacheTU.payload.toJSON());
 	return stream(c, async (stream) => {
+		// biome-ignore lint/style/noNonNullAssertion: we're checking for cacheVP right above
 		await stream.write(cacheTU!.encoded);
 	});
 });
 hono.get("/vehicle-positions", async (c) => {
 	if (!cacheVP) return c.redirect(GTFSRT_VP);
-	if (c.req.query("format") === "json")
-		return c.json(cacheVP.payload.toJSON());
+	if (c.req.query("format") === "json") return c.json(cacheVP.payload.toJSON());
 	return stream(c, async (stream) => {
+		// biome-ignore lint/style/noNonNullAssertion: we're checking for cacheVP right above
 		await stream.write(cacheVP!.encoded);
 	});
 });
