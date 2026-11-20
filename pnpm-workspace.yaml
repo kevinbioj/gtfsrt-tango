@@ -2,6 +2,6 @@ allowBuilds:
   esbuild: false
   protobufjs: true
 onlyBuiltDependencies:
-  - '@biomejs/biome'
+  - "@biomejs/biome"
   - esbuild
   - protobufjs
